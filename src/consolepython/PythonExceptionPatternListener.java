@@ -1,8 +1,14 @@
 package consolepython;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
 
 import org.eclipse.debug.ui.console.IConsole;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.swt.widgets.Display;
@@ -38,8 +44,43 @@ public class PythonExceptionPatternListener implements IPatternMatchListener {
 		}
 		return null ;
 	}
-	
-	public void consoleWriter(IConsole console, final String exception) {
+	public String callAPI(String exception) throws IOException {
+		String url = "http://172.18.13.101:8084/web-stax/stack";
+		URL obj = new URL(url);
+		HttpURLConnection connexion = (HttpURLConnection) obj.openConnection();
+		
+		connexion.setRequestMethod("POST");
+		connexion.setRequestProperty("User-Agent", "Mozilla/5.0");
+		connexion.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+ 
+		String urlParameters = "stacktrace=\""+exception+"\"";
+
+		connexion.setDoOutput(true);
+		DataOutputStream wr = new DataOutputStream(connexion.getOutputStream());
+		wr.writeBytes(urlParameters);
+		wr.flush();
+		wr.close();
+ 
+		int responseCode = connexion.getResponseCode();
+		System.out.println("\nSending 'POST' request to URL : " + url);
+		System.out.println("Post parameters : " + urlParameters);
+		System.out.println("Response Code : " + responseCode);
+ 
+		BufferedReader in = new BufferedReader(new InputStreamReader(connexion.getInputStream()));
+		String inputLine;
+		StringBuffer response = new StringBuffer();
+ 
+		while ((inputLine = in.readLine()) != null) {
+			response.append(inputLine);
+		}
+		in.close();
+ 
+		System.out.println(response.toString());
+		return response.toString().replace("[", "").replace("]", "").split(";")[0];
+	}
+
+
+	public void consoleWriter(IConsole console, final String exception, final String postId) {
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
 			public void run() {
@@ -47,16 +88,28 @@ public class PythonExceptionPatternListener implements IPatternMatchListener {
 				shell = new Shell(Display.getDefault());
 				String text = "";
 				
-				text += "A solution was found to resolve your error:\n\n"+exception.replace("\n", "");
+				text += "A solution was found to resolve your error:\n\n"+exception+"\n";
 				text += "\nDo you want to open it ?\n";
-				text += "(http://stackoverflow.com/questions/271625/)";
-				if (MessageDialog.openQuestion(shell, "ErrorResolver", text)) {
-					IWorkbenchBrowserSupport support = PlatformUI.getWorkbench().getBrowserSupport(); 
-					try {
-						IWebBrowser browser = support.createBrowser("ExceptionResolver"); 
-						browser.openURL(new URL("http://stackoverflow.com/questions/271625/"));
-					} catch (Exception	 e) {
-					}
+				text += "http://stackoverflow.com/questions/" + postId;
+				MessageDialog md = new MessageDialog(shell, "ErrorResolver", null, text, 0, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, "More"}, 0);
+				IWorkbenchBrowserSupport support = PlatformUI.getWorkbench().getBrowserSupport(); 
+				switch(md.open()) {
+					case 0:
+						try {
+							IWebBrowser browser = support.createBrowser("ExceptionResolver"); 
+							browser.openURL(new URL("http://stackoverflow.com/questions/"+postId));
+						} catch (Exception	 e) {
+						}
+						break;
+					case 1:
+						break;
+					case 2:
+						try {
+							IWebBrowser browser = support.createBrowser("ExceptionResolver"); 
+							browser.openURL(new URL("http://172.18.13.101:8084/web-stax?stacktrace="+exception));
+						} catch (Exception	 e) {
+						}
+						break;
 				}
 			}
 		});
@@ -65,10 +118,17 @@ public class PythonExceptionPatternListener implements IPatternMatchListener {
 	@Override
 	public void matchFound(PatternMatchEvent event) {
 		IConsole console = (IConsole)event.getSource();
-
-		System.out.println("Exception found");
-		System.out.println(this.getException(console, event));
-		this.consoleWriter(console, this.getException(console, event));
+		
+		String exception = this.getException(console, event);
+		String result = null;
+		try {
+			result = this.callAPI(exception);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		if (result != null && result.compareTo("") != 0) {
+			this.consoleWriter(console, exception, result);
+		}
 	}
 
 	@Override

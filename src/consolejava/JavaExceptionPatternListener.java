@@ -124,7 +124,6 @@ public class JavaExceptionPatternListener implements IPatternMatchListener {
 	public void matchFound(PatternMatchEvent event) {
 		IConsole console = (IConsole)event.getSource();
 		
-		System.out.println("found");
 		String exception = this.getException(console, event);
 		String result = null;
 		try {
@@ -138,7 +137,7 @@ public class JavaExceptionPatternListener implements IPatternMatchListener {
 	}
 
 	@Override
-	public String getPattern() {
+	public String getPattern() {	
 		return ".*(Exception|Error):?[^\\n]+\\n+(\\s*at[^\\n]+)+";
 //		return exception+frame+cause;
 	}
