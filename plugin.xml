@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.debug.ui.consoleLineTrackers">
+      <consoleLineTracker
+            class="consolejava.JavaConsoleTracker"
+            id="plugin.java.JavaConsoleTracker"
+            processType="java">
+      </consoleLineTracker>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.consoleLineTrackers">
+      <consoleLineTracker
+            class="consolepython.PythonConsoleTracker"
+            id="python.PythonConsoleTracker"
+            processType="PYDEV.PYTHON">
+      </consoleLineTracker>
+   </extension>
+
+</plugin>
