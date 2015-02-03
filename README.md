@@ -14,11 +14,10 @@ Java: JavaSE-1.7
 
 Importez le projet dans Eclipse RCP, puis le lancer en tant qu'Eclipse Application
 
+## Animation
 ![alt tag](https://raw.githubusercontent.com/AlexTwX/StackOverFlowPluginEclipse/master/Gif.gif)
 
-##
 ## Images Annexe
-##
 ![alt tag](http://i.imgur.com/AJ5T7gI.png)
 ![alt tag](http://i.imgur.com/OoKda2S.png)
 ![alt tag](http://i.imgur.com/v3Kz2p1.png)
