@@ -19,5 +19,6 @@ Importez le projet dans Eclipse RCP, puis le lancer en tant qu'Eclipse Applicati
 ![alt tag](http://i.imgur.com/OoKda2S.png)
 ![alt tag](http://i.imgur.com/v3Kz2p1.png)
 ![alt tag](http://i.imgur.com/pe8279e.png)
-![alt tag](http://i.imgur.com/pQEvMgM.png)
 ![alt tag](http://i.imgur.com/IvmpdQS.png)
+![alt tag](http://i.imgur.com/pQEvMgM.png)
+
